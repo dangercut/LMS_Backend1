@@ -23,6 +23,7 @@ class Course(models.Model):
     teacher= models.ForeignKey(Teacher,on_delete=models.CASCADE)
     title=models.CharField(max_length=150)
     description=models.TextField()
+    
 
 #Student model
 class Student(models.Model):
