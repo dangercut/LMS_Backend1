@@ -1,5 +1,6 @@
 from django.db import models
-
+from django.contrib.auth.models import AbstractUser
+from main.manager import UserManager
 #Teacher model
 class Teacher(models.Model):
     full_name=models.CharField(max_length=100)
@@ -26,13 +27,17 @@ class Course(models.Model):
     
 
 #Student model
-class Student(models.Model):
+class Student(AbstractUser):
+    username = None
+    email=models.CharField(max_length=100,unique=True)
     full_name=models.CharField(max_length=100)
-    email=models.CharField(max_length=100)
-    password=models.CharField(max_length=100)
     qualification=models.CharField(max_length=200)
     mobile_number=models.CharField(max_length=20)
     address=models.TextField()
     interested_category=models.TextField()
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+    objects= UserManager()
+
 
 
