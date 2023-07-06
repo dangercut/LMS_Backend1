@@ -11,21 +11,18 @@ from main.models import Student
 from rest_framework.exceptions import AuthenticationFailed,APIException
 import jwt
 from datetime import datetime, timedelta
-from main.serializers import StudentSerializers
+from main.serializers import StudentSerializers,ChangePasswordSerializer
 from main.authentication import create_access_token,create_refresh_token,decode_access_token,decode_refresh_token
 
 
 class TeacherDetail(generics.RetrieveDestroyAPIView):
     queryset = models.Teacher.objects.all()
     serializer_class = TeacherSerializers
-    permission_classes=[permissions.IsAuthenticated]
-    
-    
+     
 
 class TeacherList(generics.ListCreateAPIView):
     queryset = models.Teacher.objects.all()
     serializer_class = TeacherSerializers
-    permission_classes=[permissions.IsAuthenticated]
     
 
 class StudentDetail(generics.RetrieveDestroyAPIView):
@@ -56,9 +53,9 @@ class LoginStudentView(APIView):
         access_token=create_access_token(user.id)
         refresh_token=create_refresh_token(user.id)
         response=Response()
-        response.set_cookie(key='refreshToken',value=refresh_token,httponly=True)
         response.data={
-            'token':access_token
+            'access_token':access_token,
+            'refresh_token':refresh_token
         }
         return response
 
@@ -85,11 +82,26 @@ class RefreshApiView(APIView):
             "accessToken":access_token,
         })
 
-class LogoutStudentView(APIView):
+class ChangeStudentPassword(APIView):
     def post(self, request):
-        response=Response()
-        response.delete_cookie(key="refreshToken")
-        response.data = {
-            "message":"Logout successfull"
-        }
-        return response
+        auth = get_authorization_header(request).split()
+        print(auth)
+        if auth and len(auth) == 2:
+            token = auth[1].decode('utf-8')
+            id = decode_access_token(token)
+
+            user = Student.objects.filter(pk=id).first()
+            serializer = ChangePasswordSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            old_password = request.data.get('old_password')
+            new_password = request.data.get('new_password')
+
+            if not user.check_password(old_password):
+                raise APIException('Wrong old password!')
+            user.set_password(new_password)
+            user.save()
+
+            return Response({'message': 'Password changed successfully.'})
+
+        raise AuthenticationFailed('unauthenticated')
+

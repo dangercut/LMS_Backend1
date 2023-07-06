@@ -4,11 +4,9 @@ from main.manager import UserManager
 #Teacher model
 class Teacher(models.Model):
     full_name=models.CharField(max_length=100)
-    email=models.CharField(max_length=100)
-    password=models.CharField(max_length=100)
-    qualification=models.CharField(max_length=200)
-    mobile_number=models.CharField(max_length=20)
-    address=models.TextField()
+    qualification=models.CharField(max_length=100)
+    availability =models.CharField(max_length=100)
+    
 
 #Course Category Model
 class CourseCategory(models.Model):

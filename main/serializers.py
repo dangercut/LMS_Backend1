@@ -20,7 +20,7 @@ class StudentSerializers(serializers.ModelSerializer):
 class TeacherSerializers(serializers.ModelSerializer):
     class Meta:
         model = models.Teacher
-        fields =('id','full_name', 'email', 'password', 'qualification', 'mobile_number', 'address')
+        fields =('id','full_name', 'qualification', 'availability')
 
 class CourseSerializers(serializers.ModelSerializer):
     class Meta:
@@ -31,3 +31,7 @@ class CourseCategorySerializers(serializers.ModelSerializer):
     class Meta:
         model= models.CourseCategory
         fields= "__all__"
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
