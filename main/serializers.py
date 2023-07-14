@@ -31,10 +31,16 @@ class VideoSerializer(serializers.ModelSerializer):
 
 class CourseSerializer(serializers.ModelSerializer):
     videos = VideoSerializer(many=True)
+    user = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Course
-        fields = ['course_title', 'price', 'picture_file', 'course_duration', 'course_level', 'course_description','user', 'category', 'videos']
+        fields = ['course_title', 'price', 'picture_file', 'course_duration', 'course_level', 'course_description', 'user', 'category', 'videos']
+
+    def get_user(self, obj):
+        if obj.user:
+            return obj.user.full_name
+        return None
 
     def create(self, validated_data):
         videos_data = validated_data.pop('videos')
@@ -45,6 +51,7 @@ class CourseSerializer(serializers.ModelSerializer):
             videos.append(models.Video(**video_data))
         models.Video.objects.bulk_create(videos)
         return course
+
     
     
 class ChangePasswordSerializer(serializers.Serializer):
