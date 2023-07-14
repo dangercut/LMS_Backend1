@@ -17,21 +17,36 @@ class StudentSerializers(serializers.ModelSerializer):
         return  student
 
 
-class TeacherSerializers(serializers.ModelSerializer):
+class TeacherSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Teacher
-        fields =('id','full_name', 'qualification', 'availability')
+        model = models.Student
+        fields = ['teaching_experience', 'availability','expertise_area']
 
-class CourseSerializers(serializers.ModelSerializer):
+class VideoSerializer(serializers.ModelSerializer):
+    course_id = serializers.IntegerField()
+
+    class Meta:
+        model = models.Video
+        fields = ['video_title', 'video_file', 'course_id']
+
+class CourseSerializer(serializers.ModelSerializer):
+    videos = VideoSerializer(many=True)
+
     class Meta:
         model = models.Course
-        fields ="__all__"
+        fields = ['course_title', 'price', 'picture_file', 'course_duration', 'course_level', 'course_description','user', 'category', 'videos']
 
-class CourseCategorySerializers(serializers.ModelSerializer):
-    class Meta:
-        model= models.CourseCategory
-        fields= "__all__"
-
+    def create(self, validated_data):
+        videos_data = validated_data.pop('videos')
+        course = models.Course.objects.create(**validated_data)
+        videos = []
+        for video_data in videos_data:
+            video_data['course'] = course
+            videos.append(models.Video(**video_data))
+        models.Video.objects.bulk_create(videos)
+        return course
+    
+    
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
